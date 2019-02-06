@@ -19,6 +19,7 @@
   const isElement = obj => obj instanceof HTMLElement || obj instanceof SVGElement;
   const requireDomNode = el => {
     if (!isElement(el)) throw new Error(`an HTMLElement or SVGElement is required; got ${el}`);
+    return;
   };
   const isExternal = url => url && url.lastIndexOf('http',0) === 0 && url.lastIndexOf(window.location.host) === -1;
 
@@ -339,6 +340,7 @@
         image.src = uri;
       })
     });
+    return;
   };
 
   out$.download = (name, uri) => {
@@ -365,15 +367,26 @@
         window.open(uri, '_temp', 'menubar=no,toolbar=no,status=no');
       }
     }
+    return;
   };
 
   out$.saveSvg = (el, name, options) => {
-    requireDomNode(el);
-    out$.svgAsDataUri(el, options || {}, uri => out$.download(name, uri));
+    return new Promise((resolve, reject) => {
+      requireDomNode(el);
+      out$.svgAsDataUri(el, options || {}, uri => {
+        out$.download(name, uri)
+        resolve();
+      });
+    });
   };
 
   out$.saveSvgAsPng = (el, name, options) => {
-    requireDomNode(el);
-    out$.svgAsPngUri(el, options || {}, uri => out$.download(name, uri));
+    return new Promise((resolve, reject) => {
+      requireDomNode(el);
+      out$.svgAsPngUri(el, options || {}, uri => {
+        out$.download(name, uri);
+        resolve();
+      });
+    });
   };
 })();
